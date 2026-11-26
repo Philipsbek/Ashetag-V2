@@ -66,17 +66,21 @@
 
   /* ---------- Illustrated avatars (deterministic, original) ---------- */
   function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
-  function avatar(seed, bgOverride) {
+  function avatar(seed, bgOverride, gender, variant) {
     const h = hash(seed);
+    const male = gender === "male";
     const pick = (arr, k) => arr[(h >>> k) % arr.length];
     const bg = bgOverride || pick(["#ffd7f0", "#b7efb2", "#ffef99", "#e2ddfd", "#cdeeff", "#ffe1c7"], 1);
-    const skin = pick(["#f6d2b8", "#e9b48f", "#c98b62", "#a5694a", "#7a4a33", "#f3c9a5"], 3);
-    const hair = pick(["#1d1a18", "#3b2416", "#6b3e22", "#b07a3e", "#d9b26b", "#2c2a3a"], 6);
+    const skin = male ? pick(["#f6d2b8", "#f3c9a5", "#ecc19c"], 3) : pick(["#f6d2b8", "#e9b48f", "#c98b62", "#a5694a", "#7a4a33", "#f3c9a5"], 3);
+    const hair = male ? pick(["#1d1a18", "#241c18", "#1b1b22"], 6) : pick(["#1d1a18", "#3b2416", "#6b3e22", "#b07a3e", "#d9b26b", "#2c2a3a"], 6);
     const shirt = pick(["#111111", "#272625", "#10054d", "#ffffff", "#e8400d", "#6d6c6b"], 9);
-    const style = (h >>> 12) % 5;
+    // Male portraits only use short cuts: 0 = classic crop, 4 = buzz/low crop, 5 = side part.
+    const style = male ? [0, 4, 5][(variant ?? (h >>> 12)) % 3] : (h >>> 12) % 5;
     const glasses = ((h >>> 15) % 4) === 0;
     const smile = (h >>> 18) % 2;
+    const stubble = male && ((h >>> 21) % 2 === 0);
     let back = "", front = "";
+    if (style === 5) { front = `<path d="M63 97c-2-27 14-44 37-44 21 0 36 13 37 34-7-7-16-11-27-11-5 6-14 9-25 9-9 0-16 4-22 12Z" fill="${hair}"/>`; }
     if (style === 0) { front = `<path d="M62 92c0-26 16-40 38-40s38 14 38 40c-6-12-20-20-38-18-18-2-32 6-38 18Z" fill="${hair}"/>`; }
     if (style === 1) { back = `<path d="M54 100c0-34 20-52 46-52s46 18 46 52v66H54v-66Z" fill="${hair}"/>`; front = `<path d="M62 96c4-24 18-36 38-36s34 12 38 36c-14-10-26-16-38-16S76 86 62 96Z" fill="${hair}"/>`; }
     if (style === 2) { back = `<circle cx="100" cy="44" r="16" fill="${hair}"/>`; front = `<path d="M62 94c0-24 16-38 38-38s38 14 38 38c-10-10-24-16-38-16s-28 6-38 16Z" fill="${hair}"/>`; }
@@ -92,10 +96,12 @@
       <path d="M88 150h24v18c0 7-24 7-24 0Z" fill="${skin}"/>
       <ellipse cx="100" cy="108" rx="36" ry="42" fill="${skin}"/>
       <ellipse cx="64" cy="112" rx="6" ry="9" fill="${skin}"/><ellipse cx="136" cy="112" rx="6" ry="9" fill="${skin}"/>
+      ${stubble ? `<path d="M68 116c3 22 15 34 32 34s29-12 32-34c-7 9-18 14-32 14s-25-5-32-14Z" fill="${hair}" opacity=".16"/>` : ""}
       ${front}
+      ${male ? `<path d="M80 97h12M108 97h12" stroke="${hair}" stroke-width="3.5" stroke-linecap="round"/>` : ""}
       <circle cx="86" cy="106" r="3.4" fill="#1d1a18"/><circle cx="114" cy="106" r="3.4" fill="#1d1a18"/>
       <path d="M100 110v8" stroke="#00000022" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="78" cy="120" r="6" fill="#ff8a8a" opacity=".25"/><circle cx="122" cy="120" r="6" fill="#ff8a8a" opacity=".25"/>
+      <circle cx="78" cy="120" r="6" fill="#ff8a8a" opacity="${male ? ".12" : ".25"}"/><circle cx="122" cy="120" r="6" fill="#ff8a8a" opacity="${male ? ".12" : ".25"}"/>
       ${mouth}${gl}
     </svg>`;
   }
@@ -124,7 +130,7 @@
           <div class="dropdown dropdown--one" role="menu">
             <a href="about.html"><span class="dd-ico" style="background:var(--cream)">${ICONS.users}</span><span><strong>About us</strong><span class="d">The people behind the bots</span></span></a>
             <a href="about.html#values"><span class="dd-ico" style="background:var(--cream)">${ICONS.sparkle}</span><span><strong>How we work</strong><span class="d">Principles we build by</span></span></a>
-            <a href="index.html#results"><span class="dd-ico" style="background:var(--cream)">${ICONS.chart}</span><span><strong>Client results</strong><span class="d">Numbers, not promises</span></span></a>
+            <a href="index.html#results"><span class="dd-ico" style="background:var(--cream)">${ICONS.chart}</span><span><strong>Who we help</strong><span class="d">Built for Malaysian SMEs</span></span></a>
           </div>
         </li>
         <li class="nav__item"><a class="nav__link" href="blog.html"${cur("blog")}>Blog</a></li>
@@ -174,7 +180,7 @@
           <li><a href="about.html#careers">Careers<span class="hire">We're hiring</span></a></li><li><a href="contact.html">Contact</a></li></ul></div>
         <div><h4>Resources</h4><ul>
           <li><a href="blog.html">Blog</a></li><li><a href="blog-post.html">Automation playbook</a></li>
-          <li><a href="index.html#results">Case studies</a></li><li><a href="contact.html#faq">FAQ</a></li></ul></div>
+          <li><a href="index.html#results">Use cases</a></li><li><a href="contact.html#faq">FAQ</a></li></ul></div>
         <div><h4>Socials</h4><ul>
           <li><a href="#" style="display:inline-flex;gap:8px;align-items:center"><span style="width:14px;display:inline-block">${ICONS.xlogo}</span>Twitter / X</a></li>
           <li><a href="#" style="display:inline-flex;gap:8px;align-items:center"><span style="width:14px;display:inline-block">${ICONS.linkedin}</span>LinkedIn</a></li>
@@ -250,7 +256,7 @@
      assets/images/people/<data-avatar>.jpg as soon as that file exists. */
   document.querySelectorAll("[data-avatar]").forEach((el) => {
     const seed = el.dataset.avatar;
-    el.innerHTML = avatar(seed, el.dataset.bg);
+    el.innerHTML = avatar(seed, el.dataset.bg, el.dataset.gender, el.dataset.variant != null ? +el.dataset.variant : undefined);
     const img = new Image();
     img.alt = "";
     img.decoding = "async";

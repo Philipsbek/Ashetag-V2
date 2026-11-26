@@ -819,6 +819,13 @@ a.tile:hover, .tile.hoverable:hover { transform: translateY(-3px); }
   .tabbar > .btn { display: none; }
   .tab-btn { padding: 0 10px; }
 }
+/* Three-person team grid: stays three-up until phone width */
+.team.team--3 { grid-template-columns: repeat(3, 1fr); }
+.team.team--3 .member .ph { aspect-ratio: 1 / 1; }
+@media (max-width: 560px) {
+  .team.team--3 { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
