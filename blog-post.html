@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en-MY">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The small-business automation playbook: where to start in 2027 | Ashetag</title>
+  <meta name="description" content="A step-by-step framework for finding, prioritising and shipping your first ten automations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/css/styles.css?v=4">
+</head>
+<body data-page="blog">
+  <div class="progress" aria-hidden="true"></div>
+  <div data-include="header"></div>
+
+  <main>
+    <header class="article-hero container">
+      <div class="hero-in">
+        <div class="post-meta" style="justify-content:center"><a href="blog.html" style="display:inline-flex;align-items:center;gap:4px"><span data-icon="chev" style="width:14px;transform:rotate(180deg)"></span>Blog</a> · Automation · 12 min read</div>
+        <h1>The small-business automation playbook: where to start in 2027</h1>
+        <p class="lead">A step-by-step framework for finding, prioritising and shipping your first ten automations — with real numbers from 120+ client projects.</p>
+        <div class="byline"><span class="ph" data-avatar="team-ai-lead" data-bg="#ffef99"></span><span><b style="font-weight:500">Ashetag AI Engineering</b><span>Nov 24, 2026</span></span></div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="article-cover mesh mesh--aqua reveal">
+        <div data-doodle="rocket" data-draw class="float-slow"></div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="article-layout">
+        <aside class="toc" aria-label="Table of contents">
+          <h4>On this page</h4>
+          <a href="#why">Why most automation projects stall</a>
+          <a href="#find">Step 1: Find the time sinks</a>
+          <a href="#score">Step 2: Score every idea</a>
+          <a href="#ship">Step 3: Ship one in two weeks</a>
+          <a href="#scale">Step 4: Scale what works</a>
+          <a href="#takeaways">Key takeaways</a>
+        </aside>
+
+        <article class="prose">
+          <p>Every week we talk to founders who know AI could save them time but don't know where to begin. The tools are everywhere, the demos are impressive, and yet most teams are still copying data between tabs on a Friday afternoon.</p>
+          <p>After building more than 640 workflows for 120+ businesses, we've noticed that the teams who get real results all follow roughly the same path. This is that path.</p>
+
+          <h2 id="why">Why most automation projects stall</h2>
+          <p>The most common failure isn't technical. It's starting with the tool instead of the problem. Teams sign up for a platform, build something clever, and then discover nobody needed it.</p>
+          <p>The second most common failure is trying to automate everything at once. Big-bang projects take months, lose momentum and rarely make it to production.</p>
+          <blockquote>"The best first automation is boring. It's the thing someone on your team does fifty times a week and secretly hates."<cite>— CTO, Ashetag</cite></blockquote>
+
+          <h2 id="find">Step 1: Find the time sinks</h2>
+          <p>Ask everyone on your team to keep a simple log for one week: every task they repeat more than three times, roughly how long it takes, and which tools they touch. You'll usually find the same patterns:</p>
+          <ul>
+            <li><b>Data shuffling</b> — copying leads, orders or tickets from one system to another.</li>
+            <li><b>Chasing</b> — reminders for invoices, documents, approvals and follow-ups.</li>
+            <li><b>Answering</b> — the same ten customer questions, every single day.</li>
+            <li><b>Reporting</b> — pulling numbers into a spreadsheet for the Monday meeting.</li>
+          </ul>
+          <div class="callout"><span data-icon="sparkle"></span><div><b style="font-weight:500">Pro tip:</b> don't trust estimates. A task someone says takes "a couple of minutes" often takes twelve once you include switching context.</div></div>
+
+          <h2 id="score">Step 2: Score every idea</h2>
+          <p>Once you have a list, score each idea on three axes from 1 to 5. Multiply them together and sort from highest to lowest.</p>
+          <table>
+            <thead><tr><th>Criteria</th><th>What to ask</th><th>Weight</th></tr></thead>
+            <tbody>
+              <tr><td>Volume</td><td>How many times a week does this happen?</td><td>×1</td></tr>
+              <tr><td>Pain</td><td>How much does the team dread it?</td><td>×1</td></tr>
+              <tr><td>Simplicity</td><td>Are the rules clear and the data structured?</td><td>×1.5</td></tr>
+            </tbody>
+          </table>
+          <p>Simplicity gets extra weight on purpose. Your first project should be a guaranteed win that builds trust — not your most ambitious idea.</p>
+
+          <figure>
+            <div class="mesh mesh--violet"><div data-doodle="chart" data-draw style="width:160px;color:#111;position:relative;z-index:2"></div></div>
+            <figcaption>Teams that start with a high-simplicity automation are 3× more likely to ship a second one.</figcaption>
+          </figure>
+
+          <h2 id="ship">Step 3: Ship one in two weeks</h2>
+          <p>Pick the top item and give yourself a hard deadline of two weeks. Here's a typical lead-intake automation we ship for service businesses:</p>
+          <pre><code>Trigger:  New website form submission
+Step 1:   Enrich company + role (Claude web research)
+Step 2:   AI scores intent 0–100 and writes a summary
+Step 3:   Create or update deal in HubSpot
+Step 4:   If score &gt; 70 → send booking link + alert #sales
+Step 5:   Else → add to nurture sequence</code></pre>
+          <p>Notice there's a human in the loop at step 4. The AI does the research; your team makes the call. That balance is what makes automations trustworthy enough to keep running.</p>
+
+          <h3>Measure before and after</h3>
+          <p>Record how long the manual process took for the two weeks before launch, then track the same metric after. This single number is what earns you budget for the next nine automations.</p>
+
+          <h2 id="scale">Step 4: Scale what works</h2>
+          <p>Once the first workflow is stable, go back to your scored list and work down it. Most of our clients ship their next three automations in the following month, because the integrations, credentials and monitoring are already in place.</p>
+          <p>This is also the point where <a href="product.html#agents">AI agents</a> start to make sense — once your data flows cleanly, an agent can act on it with real context.</p>
+
+          <h2 id="takeaways">Key takeaways</h2>
+          <ol>
+            <li>Start with the problem, not the tool.</li>
+            <li>Log a week of real work before deciding anything.</li>
+            <li>Score ideas on volume, pain and simplicity — favour simplicity.</li>
+            <li>Ship one automation in two weeks and measure the result.</li>
+            <li>Reuse your foundations to scale quickly.</li>
+          </ol>
+
+          <div class="author-card">
+            <span class="ph" data-avatar="team-ai-lead" data-bg="#ffef99"></span>
+            <div><b style="font-weight:500">Written by Ashetag AI Engineering</b><p>Our engineering team builds automations with Claude, OpenAI, n8n and Make for clinics, law firms, agencies and online stores.</p></div>
+          </div>
+        </article>
+
+        <aside class="share">
+          <h4>Share</h4>
+          <div class="row">
+            <button aria-label="Share on X" data-share="x" data-icon="xlogo"></button>
+            <button aria-label="Share on LinkedIn" data-share="linkedin" data-icon="linkedin"></button>
+            <button aria-label="Copy link" data-copy-link data-icon="link"></button>
+          </div>
+          <div class="cta-card">
+            <p>Want us to find your first 10 automations?</p>
+            <a href="contact.html#audit" class="btn btn--sm btn--ink">Get free AI audit</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="sec-head reveal"><h2 class="h2">Keep reading</h2><a href="blog.html" class="btn btn--pearl">All articles</a></div>
+        <div class="blog-grid blog-grid--3">
+          <a href="blog-post.html" class="post-card reveal"><div class="cover"><div class="mesh mesh--pink"></div><div class="ttl">AI agents<br><em>vs.</em> chatbots</div></div><div class="post-meta">AI Agents · Nov 20, 2026</div><h3>AI agents vs. chatbots: what's actually different (and why it matters)</h3></a>
+          <a href="blog-post.html" class="post-card reveal" data-delay="1"><div class="cover"><div class="mesh mesh--peach"></div><div class="ttl">Invoices on<br><em>autopilot</em></div></div><div class="post-meta">Automation · Oct 30, 2026</div><h3>Automate invoicing end-to-end with Stripe, Xero and a little AI</h3></a>
+          <a href="blog-post.html" class="post-card reveal" data-delay="2"><div class="cover"><div class="mesh" style="background:var(--violet)"></div><div class="ttl">The <em>ROI</em><br>calculator</div></div><div class="post-meta">Automation · Sep 24, 2026</div><h3>How to calculate the ROI of an automation before you build it</h3></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-include="footer"></div>
+  <script src="assets/js/main.js?v=4"></script>
+</body>
+</html>

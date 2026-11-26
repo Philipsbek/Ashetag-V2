@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en-MY">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ashetag Vertical Ad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0b0b; overflow: hidden; }
+  body.preview { display: grid; place-items: center; }
+  #frame { position: relative; width: 540px; height: 960px; overflow: hidden; background: #0c0b0b; color: var(--ink); font-family: var(--font); flex: none; }
+  body.preview #frame { transform: scale(var(--fit, 1)); }
+  body.render #frame { position: fixed; left: 0; top: 0; }
+  /* Everything is driven by seek(t); no real-time CSS motion inside the frame. */
+  #frame *, #frame *::before, #frame *::after { animation: none !important; transition: none !important; }
+
+  .scene { position: absolute; inset: 0; overflow: hidden; display: none; will-change: transform, opacity; }
+  .persp { position: absolute; inset: 0; perspective: 1100px; }
+  .world { position: absolute; left: 50%; top: 58%; width: 0; height: 0; transform-style: preserve-3d; }
+  .obj { position: absolute; left: 0; top: 0; transform-style: preserve-3d; backface-visibility: hidden; }
+
+  /* kinetic type */
+  .wm { display: inline-block; overflow: hidden; vertical-align: top; padding: .06em 0 .14em; margin: -.06em 0 -.14em; }
+  .wi { display: inline-block; will-change: transform; }
+  .cap { position: absolute; left: 40px; right: 40px; text-align: center; z-index: 5; }
+  .cap.top { top: 92px; }
+  .eyebrow-v { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ash); margin-bottom: 14px; font-weight: 500; }
+  .h-v { font-size: 38px; line-height: 1.04; letter-spacing: -0.05em; font-weight: 400; color: var(--ink); }
+  .light { color: #fff !important; }
+  .eyebrow-v.light { color: rgba(255,255,255,.6) !important; }
+  .disp { font-size: 66px; line-height: .9; font-weight: 900; letter-spacing: -0.035em; text-transform: uppercase; color: #fff; text-align: center; }
+  .grad .wi { background: linear-gradient(90deg, #ffb27a 0%, #ffc4e6 50%, #cbb0ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* S1 */
+  .glow1 { position: absolute; left: 50%; bottom: -260px; width: 1000px; height: 820px; margin-left: -500px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(232,64,13,.55), rgba(255,150,110,.25) 45%, rgba(208,178,255,.12) 70%, transparent); }
+  .s1-lines { position: absolute; left: 0; right: 0; top: 318px; transform-origin: 50% 45%; }
+  .s1-sub { position: absolute; left: 0; right: 0; top: 560px; text-align: center; color: rgba(255,255,255,.55); font-size: 15px; letter-spacing: -0.01em; }
+
+  /* S2 */
+  .glowc { position: absolute; inset: 0; background:
+    radial-gradient(48% 34% at 50% 70%, rgba(255,196,168,.75), rgba(255,220,200,.3) 50%, transparent 78%),
+    radial-gradient(36% 28% at 18% 82%, rgba(255,215,240,.6), transparent 70%),
+    radial-gradient(36% 28% at 84% 78%, rgba(226,221,253,.75), transparent 70%); }
+  .lines2 { position: absolute; left: 0; right: 0; bottom: 0; height: 62%; width: 100%; }
+  .lines2 path { fill: none; stroke: rgba(17,17,17,.09); stroke-width: 1; stroke-dasharray: 1400; }
+  .phone { width: 264px; height: 560px; margin: -280px 0 0 -132px; border-radius: 46px; background: #121212; padding: 8px;
+    box-shadow: inset 0 0 0 1.5px #4a4745, inset 0 0 0 3.5px #121212, 0 50px 90px -30px rgba(17,17,17,.5), 0 20px 30px -20px rgba(17,17,17,.4); }
+  .phone .scr { position: relative; width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background-color: #fbfaf9; background-repeat: no-repeat; background-size: 248px auto; background-position: 0 0; }
+  .phone .island { position: absolute; top: 9px; left: 50%; width: 80px; height: 23px; margin-left: -40px; border-radius: 12px; background: #000; z-index: 3; }
+  .phone .glare { position: absolute; inset: -20%; z-index: 4; background: linear-gradient(112deg, transparent 38%, rgba(255,255,255,.6) 48%, rgba(255,255,255,0) 58%); }
+  .phone .sheen { position: absolute; inset: 0; z-index: 4; background: linear-gradient(160deg, rgba(255,255,255,.16), transparent 30%); }
+  .phone.back { filter: blur(2.5px) saturate(.9); }
+  .floor-shadow { width: 300px; height: 300px; margin: -150px 0 0 -150px; border-radius: 50%; background: radial-gradient(closest-side, rgba(17,17,17,.28), transparent); }
+  .chip-f { white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 12px; background: #fff; font-size: 14px; color: var(--ink);
+    box-shadow: 0 0 0 1px rgba(17,17,17,.05), 0 18px 34px -14px rgba(17,17,17,.3); }
+  .chip-f .dot { width: 8px; height: 8px; border-radius: 50%; background: #2bc46a; }
+  .chip-f .ic { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; }
+  .chip-f .ic svg { width: 13px; height: 13px; }
+  .chip-f .dm { width: 10px; height: 10px; border-radius: 2px; transform: rotate(45deg); }
+  .orbpill { gap: 6px; padding: 0 6px; height: 46px; background: rgba(255,255,255,.85); }
+  .orbpill i { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; }
+  .orbpill i b { width: 16px; height: 16px; border-radius: 50%; display: block; box-shadow: inset 0 -3px 6px rgba(0,0,0,.08); }
+  .orbpill i.on { background: #fff; box-shadow: 0 0 0 1px rgba(17,17,17,.05); }
+
+  /* S3 */
+  .glow3 { position: absolute; inset: 0; background:
+    radial-gradient(50% 40% at 50% 60%, rgba(208,178,255,.45), transparent 75%),
+    radial-gradient(40% 30% at 20% 85%, rgba(153,255,249,.35), transparent 70%),
+    radial-gradient(40% 30% at 85% 30%, rgba(255,215,240,.5), transparent 70%), #fbfaf9; }
+  .feed { width: 476px; margin: -215px 0 0 -238px; background: #fff; border-radius: 18px; padding: 8px; box-shadow: var(--shadow-card), 0 0 0 1px rgba(17,17,17,.04); }
+  .feed .rows { position: relative; height: 370px; overflow: hidden; }
+  .feed .app-row { position: absolute; left: 0; right: 0; top: 0; background: #fff; }
+  .feed .app-row .tag i { transform: rotate(45deg); }
+
+  /* S4 */
+  .mesh-full { position: absolute; inset: 0; border-radius: 0 !important; }
+  .chatcard { width: 430px; margin: -230px 0 0 -215px; border-radius: 20px; background: rgba(255,255,255,.8); padding: 14px; box-shadow: var(--shadow-card), 0 0 0 1px rgba(255,255,255,.6); }
+  .chat-head { display: flex; align-items: center; gap: 10px; padding: 4px 6px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .chat-head .av { width: 32px; height: 32px; border-radius: 9px; background: var(--pink); display: grid; place-items: center; color: #d6338f; }
+  .chat-head .av svg { width: 18px; height: 18px; }
+  .chat-head small { display: block; color: #1f9a52; font-size: 12px; }
+  .chat-view { position: relative; height: 380px; overflow: hidden; margin-top: 12px; }
+  .chat-list { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; gap: 10px; padding: 2px; }
+  .chat-list .bubble { font-size: 15px; transform-origin: left bottom; align-self: flex-start; }
+  .chat-list .bubble.me { align-self: flex-end; }
+  .chat-list .bubble.me { transform-origin: right bottom; }
+  .chat-list .bubble.typing { align-self: flex-start; padding: 13px 14px; }
+  .chat-list .bubble .ok { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #2bc46a; color: #fff; vertical-align: -3px; margin-left: 4px; }
+  .chat-list .bubble .ok svg { width: 12px; height: 12px; }
+
+  /* S5 */
+  .glow5 { position: absolute; inset: 0; background: radial-gradient(55% 40% at 50% 62%, rgba(255,239,153,.55), transparent 75%), radial-gradient(40% 30% at 15% 30%, rgba(255,215,240,.45), transparent 70%), #fbfaf9; }
+  .tile-v { width: 222px; height: 212px; margin: -106px 0 0 -111px; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 30px 50px -28px rgba(17,17,17,.35); }
+  .tile-v .num { display: block; font-size: 46px; letter-spacing: -0.055em; line-height: 1; font-weight: 500; margin-bottom: 8px; }
+  .tile-v p { font-size: 15px; line-height: 1.25; letter-spacing: -0.02em; margin: 0; }
+  .tile-v .brand { font-size: 14px; font-weight: 600; letter-spacing: -0.02em; display: flex; justify-content: space-between; align-items: center; }
+  .tile-v .brand svg { width: 16px; }
+
+  /* S6 */
+  .plane { position: absolute; left: 50%; top: 50%; width: 1300px; height: 2000px; margin: -1000px 0 0 -650px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+  .crow { display: flex; gap: 14px; width: max-content; }
+  .bigchip { display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 20px; border-radius: 14px; background: #fff; font-size: 21px; letter-spacing: -0.02em; color: var(--ink); white-space: nowrap; box-shadow: 0 10px 20px -10px rgba(0,0,0,.4); }
+  .bigchip i { width: 18px; height: 18px; border-radius: 5px; }
+  .shade6 { position: absolute; inset: 0; background: radial-gradient(60% 26% at 50% 32%, rgba(20,19,18,.92), rgba(20,19,18,.55) 60%, transparent), linear-gradient(#141312 0%, transparent 18%, transparent 80%, #141312 100%); }
+  .pill-v { width: 150px; height: 168px; margin: -84px 0 0 -75px; border-radius: 16px; background: rgba(29,28,27,.94); padding: 6px; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 30px 50px -20px rgba(0,0,0,.6); }
+  .pill-v .mesh { height: 118px; border-radius: 11px; }
+  .pill-v .float-ico { width: 44px !important; height: 44px !important; }
+  .pill-v span.l { display: block; color: #fff; font-size: 14px; padding: 9px 4px 0; letter-spacing: -0.01em; }
+
+  /* S7 */
+  .glow7 { position: absolute; left: 50%; bottom: -380px; width: 1100px; height: 900px; margin-left: -550px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(232,64,13,.42), rgba(208,178,255,.16) 55%, transparent); }
+  .end { position: absolute; left: 0; right: 0; top: 214px; text-align: center; }
+  .end .disp { font-size: 56px; }
+  .cta-v { width: 420px; margin: 44px auto 0; }
+  .cta-v .capture { margin: 0; max-width: none; height: 56px; align-items: center; }
+  .cta-v .typed { flex: 1; text-align: left; padding-left: 12px; color: #fff; font-size: 16px; display: flex; align-items: center; }
+  .cta-v .typed .ph { color: rgba(255,255,255,.4); }
+  .cta-v .caret { display: inline-block; width: 1.5px; height: 20px; background: #fff; margin-left: 2px; }
+  .cta-v .btn { height: 44px; padding: 0 18px; font-size: 15px; }
+  .cta-v .btn.done { background: var(--mint); }
+  .lockup { display: inline-flex; align-items: center; gap: 10px; color: #fff; font-size: 30px; letter-spacing: -0.045em; font-weight: 500; margin-top: 70px; }
+  .lockup svg { width: 32px; height: 32px; }
+  .url { color: rgba(255,255,255,.5); font-size: 15px; margin-top: 10px; letter-spacing: -0.01em; }
+
+  /* overlays */
+  #grain { position: absolute; inset: -60px; background-image: var(--noise); opacity: .085; mix-blend-mode: overlay; pointer-events: none; z-index: 50; }
+  #vignette { position: absolute; inset: 0; pointer-events: none; z-index: 49; background: radial-gradient(120% 90% at 50% 50%, transparent 60%, rgba(0,0,0,.22)); }
+  #black { position: absolute; inset: 0; background: #000; z-index: 48; pointer-events: none; opacity: 0; }
+
+  #hud { position: fixed; left: 12px; bottom: 12px; color: #aaa; font: 12px/1.4 ui-monospace, monospace; }
+  body.render #hud { display: none; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="mbx3" x="-20%" y="-5%" width="140%" height="110%"><feGaussianBlur id="mbx3b" stdDeviation="0 0"/></filter>
+  <filter id="mbx4" x="-20%" y="-5%" width="140%" height="110%"><feGaussianBlur id="mbx4b" stdDeviation="0 0"/></filter>
+  <filter id="mby5" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur id="mby5b" stdDeviation="0 0"/></filter>
+  <filter id="mby6" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur id="mby6b" stdDeviation="0 0"/></filter>
+</svg>
+
+<div id="frame">
+  <!-- S1 · Cold open -->
+  <section class="scene" id="s1" style="background:#0c0b0b">
+    <div class="glow1" id="glow1"></div>
+    <div class="s1-lines" id="s1lines">
+      <div class="disp" data-kt>Busywork?</div>
+      <div class="disp" data-kt>Put it on</div>
+      <div class="disp grad" data-kt>autopilot.</div>
+    </div>
+    <div class="s1-sub" id="s1sub" data-kt>AI automations · AI agents · Websites</div>
+  </section>
+
+  <!-- S2 · Hero phone -->
+  <section class="scene" id="s2" style="background:#fbfaf9">
+    <div class="glowc"></div>
+    <svg class="lines2" id="lines2" viewBox="0 0 540 600" preserveAspectRatio="none">
+      <path d="M-20 600C80 470 120 330 250 230"/><path d="M-20 560C100 440 150 310 270 250"/><path d="M-20 520C120 410 180 300 290 270"/>
+      <path d="M560 600C460 470 420 330 290 230"/><path d="M560 560C440 440 390 310 270 250"/><path d="M560 520C420 410 360 300 250 270"/>
+    </svg>
+    <div class="cap top" id="cap2">
+      <div class="eyebrow-v" data-kt>Ashetag · AI automation studio</div>
+      <div class="h-v" data-kt>Agents run your operations.</div>
+    </div>
+    <div class="persp"><div class="world" id="w2" style="top:61%">
+      <div class="obj floor-shadow" id="sh2"></div>
+      <div class="obj phone back" id="ph2b"><div class="scr" style="background-image:url(shots/product-screen.jpg)"><div class="island"></div><div class="sheen"></div></div></div>
+      <div class="obj phone back" id="ph2c"><div class="scr" style="background-image:url(shots/blog-screen.jpg)"><div class="island"></div><div class="sheen"></div></div></div>
+      <div class="obj phone" id="ph2"><div class="scr" id="scr2" style="background-image:url(shots/home-screen.jpg)"><div class="island"></div><div class="sheen"></div><div class="glare" id="glare2"></div></div></div>
+      <div class="obj chip-f" id="c2a"><span class="dot" id="dot2"></span>142 running now</div>
+      <div class="obj chip-f" id="c2b"><span class="ic" style="background:var(--pink)" data-icon="calendar"></span>Appointment booked<span class="dm" style="background:#e8400d"></span></div>
+      <div class="obj chip-f orbpill" id="c2c"><i class="on"><b style="background:radial-gradient(circle at 35% 30%,#fff,#c8b8ff 55%,#a58cf5)"></b></i><i><b style="background:radial-gradient(circle at 35% 30%,#fff,#ffb3e6 55%,#f07dc8)"></b></i><i><b style="background:radial-gradient(circle at 35% 30%,#fff,#a5e89e 55%,#5fcf5a)"></b></i><i><b style="background:radial-gradient(circle at 35% 30%,#fff,#ffd4a8 55%,#f5a86b)"></b></i></div>
+      <div class="obj chip-f" id="c2d"><span class="ic" style="background:var(--canary)" data-icon="users"></span>Lead qualified<span class="dm" style="background:#e8a10d"></span></div>
+    </div></div>
+  </section>
+
+  <!-- S3 · Live automations macro -->
+  <section class="scene" id="s3">
+    <div class="glow3"></div>
+    <div class="cap top" id="cap3">
+      <div class="eyebrow-v" data-kt>AI automations</div>
+      <div class="h-v" data-kt>Workflows that never sleep.</div>
+    </div>
+    <div class="persp"><div class="world" id="w3" style="top:57%">
+      <div class="obj feed" id="feed3">
+        <div class="app-mock__bar"><span class="cb"></span><svg width="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m1 1 4 4 4-4"/></svg> Live automations <span class="pill"><i id="dot3"></i><b id="cnt3" style="font-weight:400">142</b>&nbsp;running now</span></div>
+        <div class="rows" id="rows3"></div>
+      </div>
+      <div class="obj chip-f" id="c3a"><span class="ic" style="background:var(--violet)" data-icon="bolt"></span>0.8s average run time</div>
+    </div></div>
+  </section>
+
+  <!-- S4 · Chat agent -->
+  <section class="scene" id="s4">
+    <div class="mesh mesh--sunset mesh-full"></div>
+    <div class="cap top" id="cap4">
+      <div class="eyebrow-v" data-kt style="color:#6d4b3b">AI agents</div>
+      <div class="h-v" data-kt>Answers, qualifies &amp; books. 24/7.</div>
+    </div>
+    <div class="persp"><div class="world" id="w4" style="top:61%">
+      <div class="obj chatcard" id="chat4">
+        <div class="chat-head"><span class="av" data-icon="bot"></span><span><b style="font-weight:500">Clinic assistant</b><small>● Online now</small></span></div>
+        <div class="chat-view"><div class="chat-list" id="list4">
+          <div class="bubble ai" data-at="13.7">Hi! I'm the clinic's virtual assistant. How can I help today?</div>
+          <div class="bubble me" data-at="14.45">My tooth has been hurting. Can I come in this week?</div>
+          <div class="bubble ai typing" data-from="15.0" data-to="15.75"><i></i><i></i><i></i></div>
+          <div class="bubble ai" data-at="15.75">We have a slot <b>tomorrow at 9:30</b> or <b>Thursday at 14:00</b>. Which works better?</div>
+          <div class="bubble me" data-at="16.5">Tomorrow please!</div>
+          <div class="bubble ai typing" data-from="16.85" data-to="17.35"><i></i><i></i><i></i></div>
+          <div class="bubble ai" data-at="17.35">Booked <span class="ok" data-icon="check"></span> Confirmation and pre-visit form sent to your phone.</div>
+        </div></div>
+      </div>
+      <div class="obj chip-f" id="c4a"><span class="ic" style="background:var(--mint);color:#1f9a52" data-icon="check"></span>Appointment booked</div>
+      <div class="obj chip-f" id="c4b"><span class="ic" style="background:var(--violet)" data-icon="bolt"></span>First reply in 9s</div>
+    </div></div>
+  </section>
+
+  <!-- S5 · Exploded results -->
+  <section class="scene" id="s5">
+    <div class="glow5"></div>
+    <div class="cap top" id="cap5">
+      <div class="eyebrow-v" data-kt>Client results</div>
+      <div class="h-v" data-kt>Results, not promises.</div>
+    </div>
+    <div class="persp" style="perspective:1000px"><div class="world" id="w5" style="top:60%">
+      <div class="obj tile-v tile--pink"><div><b class="num" data-to="5.3" data-pre="RM " data-suf="M" data-dec="1">RM 0M</b><p>pipeline recovered<br>in 90 days</p></div><span class="brand">Shopify + Claude</span></div>
+      <div class="obj tile-v tile--mint"><div><b class="num" data-to="38" data-suf=" hrs">0 hrs</b><p>of admin saved<br>every week</p></div><span class="brand">n8n + OpenAI</span></div>
+      <div class="obj tile-v tile--canary"><div><b class="num" data-to="71" data-suf="%">0%</b><p>of patient calls<br>handled by AI</p></div><span class="brand">ElevenLabs</span></div>
+      <div class="obj tile-v tile--violet"><div><b class="num" data-to="2.4" data-suf="×" data-dec="1">0×</b><p>average lift in<br>conversion rate</p></div><span class="brand">Webflow + Claude</span></div>
+    </div></div>
+  </section>
+
+  <!-- S6 · Tool stack floor -->
+  <section class="scene" id="s6" style="background:#141312">
+    <div class="persp" style="perspective:900px"><div class="plane" id="plane6"></div></div>
+    <div class="shade6"></div>
+    <div class="cap top" id="cap6" style="top:150px">
+      <div class="eyebrow-v light" data-kt>Built with</div>
+      <div class="h-v light" data-kt>The AI stack you already trust.</div>
+    </div>
+    <div class="persp"><div class="world" id="w6" style="top:64%">
+      <div class="obj pill-v"><div class="mesh mesh--violet"><span class="float-ico" style="color:#7b61ff" data-icon="flow"></span></div><span class="l">Automations</span></div>
+      <div class="obj pill-v"><div class="mesh mesh--pink"><span class="float-ico" style="color:#d6338f" data-icon="bot"></span></div><span class="l">AI Agents</span></div>
+      <div class="obj pill-v"><div class="mesh mesh--green"><span class="float-ico" style="color:#2b9a3f" data-icon="globe"></span></div><span class="l">Websites</span></div>
+      <div class="obj pill-v"><div class="mesh mesh--peach"><span class="float-ico" style="color:#e8400d" data-icon="gauge"></span></div><span class="l">Optimization</span></div>
+    </div></div>
+  </section>
+
+  <!-- S7 · End card -->
+  <section class="scene" id="s7" style="background:#111">
+    <div class="glow7" id="glow7"></div>
+    <div class="end" id="end7">
+      <div class="disp" data-kt>Put</div>
+      <div class="disp grad" data-kt>AI agents</div>
+      <div class="disp" data-kt>to work for</div>
+      <div class="disp" data-kt>your business</div>
+      <div class="cta-v" id="cta7">
+        <div class="capture capture--dark"><span class="typed"><span id="typed7"></span><span class="caret" id="caret7"></span></span><span class="btn btn--white" id="btn7">Get free AI audit</span></div>
+      </div>
+      <div class="lockup" id="lock7"><span data-icon="logo"></span>ashetag</div>
+      <div class="url" id="url7">ashetag.com · Free 30-minute AI audit</div>
+    </div>
+  </section>
+
+  <div id="black"></div>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+</div>
+<div id="hud"></div>
+
+<script src="../assets/js/main.js"></script>
+<script>
+(() => {
+  const DUR = 30;
+  const params = new URLSearchParams(location.search);
+  const RENDER = params.has("render");
+  document.body.classList.add(RENDER ? "render" : "preview");
+
+  /* ---------- math ---------- */
+  const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const L = (a, b, k) => a + (b - a) * k;
+  const E = {
+    lin: (x) => x,
+    oExpo: (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x)),
+    iExpo: (x) => (x <= 0 ? 0 : Math.pow(2, 10 * x - 10)),
+    oCubic: (x) => 1 - Math.pow(1 - x, 3),
+    ioCubic: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+    ioSine: (x) => -(Math.cos(Math.PI * x) - 1) / 2,
+    ioQuint: (x) => (x < 0.5 ? 16 * x ** 5 : 1 - Math.pow(-2 * x + 2, 5) / 2),
+    oBack: (x) => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); },
+  };
+  const P = (t, a, b, e = E.lin) => e(cl((t - a) / (b - a)));
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const tf = (el, o) => {
+    el.style.transform = `translate3d(${(o.x || 0).toFixed(2)}px,${(o.y || 0).toFixed(2)}px,${(o.z || 0).toFixed(2)}px) rotateX(${(o.rx || 0).toFixed(3)}deg) rotateY(${(o.ry || 0).toFixed(3)}deg) rotateZ(${(o.rz || 0).toFixed(3)}deg) scale(${(o.s ?? 1).toFixed(4)})`;
+  };
+  const op = (el, v) => { el.style.opacity = cl(v).toFixed(3); };
+
+  /* ---------- kinetic type: wrap each word in a mask ---------- */
+  $$("[data-kt]").forEach((el) => {
+    el.innerHTML = el.innerHTML.trim().split(/\s+/).map((w) => `<span class="wm"><span class="wi">${w}</span></span>`).join(" ");
+  });
+  const kin = (el, t, start, stagger = 0.06, dur = 0.85) => {
+    $$(".wi", el).forEach((w, i) => {
+      const k = P(t, start + i * stagger, start + i * stagger + dur, E.oExpo);
+      w.style.transform = `translateY(${((1 - k) * 108).toFixed(2)}%)`;
+      w.style.visibility = k > 0 ? "visible" : "hidden";
+    });
+  };
+
+  /* ---------- scenes ---------- */
+  const scenes = {
+    s1: [0, 3.45], s2: [2.6, 8.65], s3: [7.85, 13.4], s4: [12.6, 18.6],
+    s5: [17.85, 23.1], s6: [22.4, 26.75], s7: [26.7, 30.01],
+  };
+  const S = {}; Object.keys(scenes).forEach((k) => (S[k] = document.getElementById(k)));
+
+  /* S3 rows */
+  const rowsData = [
+    ["n8n invoice flow", "Wholesale distributor · Synced to Xero", "Invoice processed", "#b7efb2", "#2bc46a", "db"],
+    ["Zapier KPI digest", "Agency · Report posted to Slack", "Report sent", "#e2ddfd", "#7b61ff", "chart"],
+    ["ElevenLabs voice agent", "Dental clinic · Patient call answered", "Appointment booked", "#ffd7f0", "#e8400d", "calendar"],
+    ["Claude lead qualifier", "Real estate agency · Scored & routed", "Lead qualified", "#ffef99", "#e8a10d", "users"],
+    ["OpenAI intake summary", "Law firm · Summary sent to Slack", "Case summarised", "#cdeeff", "#1e88e5", "chat"],
+    ["Make cart recovery", "Online store · Follow-up sent", "Revenue recovered", "#ffe1c7", "#e8400d", "cart"],
+    ["Webflow website", "Design studio · 98 Lighthouse score", "Site deployed", "#e2ddfd", "#7b61ff", "globe"],
+    ["Gemini support agent", "Clinic network · Ticket resolved", "Ticket resolved", "#b7efb2", "#2bc46a", "bot"],
+  ];
+  const rowEnter = [-9, -9, 8.55, 9.25, 9.95, 10.65, 11.35, 12.05];
+  const rowsEl = $("#rows3");
+  rowsData.forEach(([n, p, tg, bg, c, ic]) => {
+    const d = document.createElement("div");
+    d.className = "app-row";
+    d.innerHTML = `<span class="cb"></span><span class="av" style="background:${bg}">${ICONS[ic]}<i class="mini" style="background:${c}"></i></span><span class="meta"><b>${n}</b><span>${p}</span></span><span class="tag">${tg}<i style="background:${c}"></i></span>`;
+    rowsEl.appendChild(d);
+  });
+  const rowEls = $$(".app-row", rowsEl);
+
+  /* S6 chip floor */
+  const tools = [["OpenAI", "#10a37f"], ["Claude", "#d97757"], ["Gemini", "#4285f4"], ["n8n", "#ff6d5a"], ["Make", "#6d5bd0"], ["Zapier", "#ff4a00"], ["ElevenLabs", "#111"], ["Webflow", "#4353ff"],
+    ["HubSpot", "#ff7a59"], ["Slack", "#4a154b"], ["Stripe", "#635bff"], ["Xero", "#13b5ea"], ["Shopify", "#96bf48"], ["Notion", "#000"], ["Airtable", "#f2c94c"], ["WhatsApp", "#25d366"]];
+  const plane = $("#plane6");
+  const crows = [];
+  for (let r = 0; r < 12; r++) {
+    const row = document.createElement("div"); row.className = "crow";
+    const order = tools.map((_, i) => tools[(i * 5 + r * 3) % tools.length]);
+    const set = order.map(([n, c]) => `<span class="bigchip"><i style="background:${c}"></i>${n}</span>`).join("");
+    row.innerHTML = set + set + set;
+    plane.appendChild(row); crows.push(row);
+  }
+  let rowW = [];
+
+  const tiles5 = $$("#w5 .tile-v");
+  const pills6 = $$("#w6 .pill-v");
+  const bubbles = $$("#list4 .bubble");
+  const typedText = "you@company.com";
+
+  /* ---------- seek(t): the whole film as a pure function of time ---------- */
+  function seek(t) {
+    for (const k in scenes) { const [a, b] = scenes[k]; S[k].style.display = t >= a && t < b ? "block" : "none"; }
+
+    /* grain jitter (deterministic per frame) */
+    const f = Math.floor(t * 24);
+    $("#grain").style.transform = `translate(${((f * 37) % 60) - 30}px, ${((f * 53) % 60) - 30}px)`;
+
+    /* ===== S1 · cold open ===== */
+    if (t < 3.45) {
+      const g = P(t, 0, 1.8, E.oCubic);
+      $("#glow1").style.transform = `translateY(${(1 - g) * 160}px) scale(${L(0.45, 1.08, g)})`; op($("#glow1"), g);
+      $$(".disp", $("#s1lines")).forEach((el, i) => kin(el, t, 0.25 + i * 0.34, 0.07, 0.9));
+      kin($("#s1sub"), t, 1.45, 0.04, 0.8);
+      const x = P(t, 2.45, 3.35, E.iExpo);
+      const lines = $("#s1lines");
+      lines.style.transform = `scale(${L(1, 1.06, P(t, 0, 2.45)) * L(1, 3.4, x)})`;
+      lines.style.filter = `blur(${(x * 16).toFixed(2)}px)`; op(lines, 1 - P(t, 2.85, 3.3));
+      op($("#s1sub"), 1 - P(t, 2.4, 2.8));
+    }
+
+    /* ===== S2 · hero phone ===== */
+    if (t >= 2.6 && t < 8.65) {
+      const iris = P(t, 2.75, 3.55, E.ioCubic);
+      S.s2.style.clipPath = iris < 1 ? `circle(${(iris * 120).toFixed(2)}% at 50% 58%)` : "none";
+      $$("#lines2 path").forEach((p, i) => (p.style.strokeDashoffset = (1400 * (1 - P(t, 3.0 + i * 0.08, 5.2 + i * 0.08, E.oCubic))).toFixed(1)));
+      kin($("#cap2 .eyebrow-v"), t, 3.25, 0.05, 0.8);
+      kin($("#cap2 .h-v"), t, 3.4, 0.07, 0.95);
+
+      const k = P(t, 2.95, 4.75, E.oExpo);
+      const orbit = P(t, 4.3, 8.4, E.ioSine);
+      const push = P(t, 7.75, 8.6, E.iExpo);
+      const w = $("#w2");
+      tf(w, {
+        y: L(560, 0, k) + Math.sin(t * 1.4) * 4 + push * 40,
+        rx: L(58, 10, k) - orbit * 4 - push * 8,
+        ry: L(-40, -18, k) + orbit * 30 - push * 6,
+        rz: L(11, -3, k) + orbit * 3,
+        s: L(0.8, 1, k) * L(1, 3.1, push),
+      });
+      op(w, 1 - P(t, 8.25, 8.6));
+      S.s2.style.filter = push > 0 ? `blur(${(push * 8).toFixed(2)}px)` : "none";
+
+      tf($("#ph2"), { y: Math.sin(t * 1.7) * 5, z: 0 });
+      const kb = P(t, 3.5, 5.1, E.oExpo);
+      tf($("#ph2b"), { x: L(260, 168, kb), y: -46 + Math.sin(t * 1.3 + 1) * 6, z: L(-900, -300, kb), ry: -8 });
+      tf($("#ph2c"), { x: L(-260, -168, kb), y: -6 + Math.sin(t * 1.2 + 2) * 6, z: L(-900, -380, kb), ry: 8 });
+      op($("#ph2b"), kb * 0.95); op($("#ph2c"), kb * 0.9);
+      tf($("#sh2"), { y: 300, z: -20, rx: 90, s: L(0.6, 1, k) });
+      op($("#sh2"), k);
+
+      $("#scr2").style.backgroundPosition = `0 ${(-L(0, 330, P(t, 5.0, 7.6, E.ioCubic))).toFixed(2)}px`;
+      $("#glare2").style.transform = `translateX(${L(-110, 110, P(t, 5.2, 6.4, E.ioCubic)).toFixed(2)}%)`;
+
+      const chips = [["#c2a", -96, -228, 120, 4.2], ["#c2b", 104, -70, 150, 4.5], ["#c2c", -100, 178, 100, 4.8], ["#c2d", 104, 236, 80, 5.1]];
+      chips.forEach(([id, x, y, z, at], i) => {
+        const c = P(t, at, at + 0.7, E.oBack);
+        const el = $(id);
+        tf(el, { x: x - el.offsetWidth / 2, y: y - 20 + Math.sin(t * 1.6 + i * 1.3) * 7, z, s: L(0.5, 1, c) });
+        op(el, P(t, at, at + 0.25));
+      });
+      const ph = (t * 1.4) % 1;
+      $("#dot2").style.boxShadow = `0 0 0 ${(ph * 6).toFixed(2)}px rgba(43,196,106,${(0.5 * (1 - ph)).toFixed(3)})`;
+    }
+
+    /* ===== S3 · live automations ===== */
+    if (t >= 7.85 && t < 13.4) {
+      const inn = P(t, 7.9, 8.75, E.oExpo);
+      op(S.s3, P(t, 7.9, 8.3));
+      kin($("#cap3 .eyebrow-v"), t, 8.25, 0.05, 0.8);
+      kin($("#cap3 .h-v"), t, 8.4, 0.07, 0.95);
+      const drift = P(t, 7.9, 13.2, E.ioSine);
+      tf($("#w3"), { rx: L(20, 7, drift), ry: L(16, -10, drift), rz: L(-4, 1.5, drift), z: L(-60, 50, drift), s: L(1.7, 1, inn) });
+      $("#w3").style.filter = inn < 1 ? `blur(${((1 - inn) * 10).toFixed(2)}px)` : "none";
+
+      let entered = 0;
+      rowEls.forEach((el, i) => {
+        const T = rowEnter[i];
+        let slot = 0;
+        for (let j = i + 1; j < rowEls.length; j++) slot += P(t, rowEnter[j], rowEnter[j] + 0.75, E.oExpo);
+        const vis = P(t, T, T + 0.55, E.oExpo);
+        if (t >= T) entered++;
+        el.style.display = t >= T ? "flex" : "none";
+        el.style.transform = `translateY(${(slot * 74 - (1 - vis) * 40).toFixed(2)}px) scale(${L(1.04, 1, vis).toFixed(4)})`;
+        el.style.opacity = (vis * (1 - cl(slot - 4.2, 0, 1))).toFixed(3);
+        el.style.filter = slot > 3.1 ? `blur(${(cl(slot - 3.1, 0, 2) * 2.2).toFixed(2)}px)` : "none";
+        const flash = T > 0 ? 1 - P(t, T + 0.35, T + 1.4) : 0;
+        el.style.background = `rgba(255,248,214,${(flash * 0.95).toFixed(3)})`;
+        el.style.zIndex = String(20 - Math.round(slot));
+      });
+      $("#cnt3").textContent = String(140 + entered);
+      const ph = (t * 1.4) % 1;
+      $("#dot3").style.boxShadow = `0 0 0 ${(ph * 5).toFixed(2)}px rgba(43,196,106,${(0.5 * (1 - ph)).toFixed(3)})`;
+
+      const c = P(t, 9.6, 10.3, E.oBack);
+      tf($("#c3a"), { x: 60, y: 218 + Math.sin(t * 1.5) * 6, z: 120, s: L(0.5, 1, c) }); op($("#c3a"), P(t, 9.6, 9.85));
+
+      const wx = P(t, 12.65, 13.3, E.iExpo);
+      S.s3.style.transform = `translateX(${(-wx * 600).toFixed(2)}px)`;
+      $("#mbx3b").setAttribute("stdDeviation", `${(wx * 26).toFixed(2)} 0`);
+      S.s3.style.filter = wx > 0 ? "url(#mbx3)" : "none";
+    }
+
+    /* ===== S4 · chat agent ===== */
+    if (t >= 12.6 && t < 18.6) {
+      const wi = P(t, 12.75, 13.45, E.oExpo);
+      S.s4.style.transform = `translateX(${((1 - wi) * 600).toFixed(2)}px)`;
+      $("#mbx4b").setAttribute("stdDeviation", `${((1 - wi) * 26).toFixed(2)} 0`);
+      S.s4.style.filter = wi < 1 ? "url(#mbx4)" : "none";
+      kin($("#cap4 .eyebrow-v"), t, 13.2, 0.05, 0.8);
+      kin($("#cap4 .h-v"), t, 13.35, 0.07, 0.95);
+
+      const arc = P(t, 12.8, 18.5, E.ioSine);
+      const out = P(t, 17.95, 18.55, E.iExpo);
+      tf($("#w4"), { rx: L(12, 4, arc), ry: L(-20, 16, arc), rz: L(2, -2, arc), z: L(-40, 40, arc), s: L(1, 0.8, out) });
+      op(S.s4, 1 - out);
+
+      let H = 0;
+      bubbles.forEach((b) => {
+        if (b.dataset.from) {
+          const a = +b.dataset.from, z = +b.dataset.to;
+          const on = t >= a && t < z;
+          b.style.display = on ? "inline-flex" : "none";
+          if (on) {
+            const g = P(t, a, a + 0.3, E.oBack);
+            b.style.transform = `scale(${L(0.6, 1, g).toFixed(3)})`; b.style.opacity = P(t, a, a + 0.15).toFixed(3);
+            $$("i", b).forEach((d, j) => (d.style.transform = `translateY(${(-4 * Math.max(0, Math.sin(t * 9 - j * 0.9))).toFixed(2)}px)`));
+            H += (b.offsetHeight + 10) * P(t, a, a + 0.3, E.oExpo) * (1 - P(t, z - 0.12, z));
+          }
+          return;
+        }
+        const at = +b.dataset.at;
+        b.style.display = t >= at ? "block" : "none";
+        if (t >= at) {
+          const g = P(t, at, at + 0.5, E.oBack);
+          b.style.transform = `translateY(${((1 - g) * 14).toFixed(2)}px) scale(${L(0.82, 1, g).toFixed(4)})`;
+          b.style.opacity = P(t, at, at + 0.18).toFixed(3);
+          H += (b.offsetHeight + 10) * P(t, at, at + 0.45, E.oExpo);
+        }
+      });
+      $("#list4").style.transform = `translateY(${(-Math.max(0, H - 370)).toFixed(2)}px)`;
+
+      const ca = P(t, 17.55, 18.2, E.oBack);
+      tf($("#c4a"), { x: -20, y: 214 + Math.sin(t * 1.6) * 5, z: 150, s: L(0.4, 1, ca) }); op($("#c4a"), P(t, 17.55, 17.75));
+      const cb = P(t, 14.7, 15.4, E.oBack);
+      tf($("#c4b"), { x: -250, y: -268 + Math.sin(t * 1.4 + 1) * 5, z: 110, s: L(0.4, 1, cb) }); op($("#c4b"), P(t, 14.7, 14.9));
+    }
+
+    /* ===== S5 · exploded results ===== */
+    if (t >= 17.85 && t < 23.1) {
+      op(S.s5, P(t, 17.9, 18.35));
+      kin($("#cap5 .eyebrow-v"), t, 18.3, 0.05, 0.8);
+      kin($("#cap5 .h-v"), t, 18.45, 0.07, 0.95);
+      const orbit = P(t, 18, 22.9, E.ioSine);
+      tf($("#w5"), { rx: L(16, 6, orbit), ry: L(-18, 16, orbit), rz: L(-3, 2, orbit) });
+      const grid = [[-117, -110], [117, -110], [-117, 110], [117, 110]];
+      const from = [[-60, 40, -30], [55, -50, 25], [-45, -60, 20], [50, 45, -25]];
+      tiles5.forEach((el, i) => {
+        const s0 = 18.15 + i * 0.3;
+        const k = P(t, s0, s0 + 1.5, E.oExpo);
+        const [gx, gy] = grid[i]; const [frx, fry, frz] = from[i];
+        const fl = Math.sin(t * 1.5 + i * 1.7) * 6 * k;
+        tf(el, { x: gx * L(2.6, 1, k), y: gy * L(2.6, 1, k) + fl, z: L(-1700, 0, k) + Math.sin(t * 1.1 + i) * 12 * k, rx: frx * (1 - k), ry: fry * (1 - k), rz: frz * (1 - k) });
+        op(el, P(t, s0, s0 + 0.35));
+        const n = el.querySelector(".num"); const to = +n.dataset.to; const dec = +(n.dataset.dec || 0);
+        n.textContent = (n.dataset.pre || "") + (to * P(t, s0 + 0.35, s0 + 1.7, E.oExpo)).toFixed(dec) + (n.dataset.suf || "");
+      });
+      const up = P(t, 22.45, 23.05, E.iExpo);
+      S.s5.style.transform = `translateY(${(-up * 1000).toFixed(2)}px)`;
+      $("#mby5b").setAttribute("stdDeviation", `0 ${(up * 30).toFixed(2)}`);
+      S.s5.style.filter = up > 0 ? "url(#mby5)" : "none";
+    }
+
+    /* ===== S6 · tool floor ===== */
+    if (t >= 22.4 && t < 26.75) {
+      if (!rowW.length) rowW = crows.map((r) => r.scrollWidth / 3);
+      const ui = P(t, 22.55, 23.2, E.oExpo);
+      S.s6.style.transform = `translateY(${((1 - ui) * 1000).toFixed(2)}px)`;
+      $("#mby6b").setAttribute("stdDeviation", `0 ${((1 - ui) * 30).toFixed(2)}`);
+      S.s6.style.filter = ui < 1 ? "url(#mby6)" : "none";
+      const dr = P(t, 22.4, 26.7, E.ioSine);
+      const zoom = P(t, 25.95, 26.7, E.iExpo);
+      plane.style.transform = `rotateX(56deg) rotateZ(${L(-30, -20, dr).toFixed(3)}deg) translateY(${L(80, -60, dr).toFixed(2)}px) scale(${(L(1.05, 1.18, dr) * L(1, 1.6, zoom)).toFixed(4)})`;
+      crows.forEach((r, i) => {
+        const dir = i % 2 ? 1 : -1; const speed = 70 + (i % 3) * 22;
+        const off = (((dir * speed * t) % rowW[i]) + rowW[i]) % rowW[i];
+        r.style.transform = `translateX(${(-rowW[i] + off - (i % 4) * 40).toFixed(2)}px)`;
+      });
+      kin($("#cap6 .eyebrow-v"), t, 23.0, 0.05, 0.8);
+      kin($("#cap6 .h-v"), t, 23.15, 0.07, 0.95);
+      const pos = [[-82, -92], [82, -92], [-82, 92], [82, 92]];
+      tf($("#w6"), { rx: L(14, 6, dr), ry: L(-14, 12, dr), s: L(1, 1.35, zoom) });
+      pills6.forEach((el, i) => {
+        const s0 = 23.5 + i * 0.16;
+        const k = P(t, s0, s0 + 0.9, E.oBack);
+        tf(el, { x: pos[i][0], y: pos[i][1] + Math.sin(t * 1.6 + i * 1.2) * 6, z: L(-500, 0, P(t, s0, s0 + 0.9, E.oExpo)) + (i % 2 ? 20 : -10), rz: (1 - k) * (i % 2 ? 14 : -14), s: L(0.6, 1, k) });
+        op(el, P(t, s0, s0 + 0.25));
+        const ico = el.querySelector(".float-ico");
+        ico.style.transform = `translate(-50%, calc(-50% + ${(Math.sin(t * 2 + i) * 3).toFixed(2)}px))`;
+      });
+      op($("#black"), zoom);
+    } else if (t >= 26.75 && t < 26.95) {
+      op($("#black"), 1);
+    } else {
+      op($("#black"), 0);
+    }
+
+    /* ===== S7 · end card ===== */
+    if (t >= 26.7) {
+      op($("#black"), t < 26.75 ? 1 : 1 - P(t, 26.75, 27.15));
+      const g = P(t, 26.7, 28.4, E.oCubic);
+      $("#glow7").style.transform = `translateY(${((1 - g) * 200).toFixed(2)}px) scale(${L(0.6, 1, g).toFixed(4)})`; op($("#glow7"), g);
+      $$(".disp", $("#end7")).forEach((el, i) => kin(el, t, 26.85 + i * 0.2, 0.07, 0.95));
+      const c = P(t, 27.75, 28.3, E.oExpo);
+      tf($("#cta7"), { y: (1 - c) * 24 }); op($("#cta7"), c);
+      const nch = Math.floor(P(t, 28.0, 28.65) * typedText.length);
+      $("#typed7").innerHTML = nch ? typedText.slice(0, nch) : '<span class="ph">What\'s your work email?</span>';
+      $("#caret7").style.opacity = t > 27.9 && t < 28.9 ? (Math.floor(t * 3) % 2 ? 0 : 1) : 0;
+      const pr = P(t, 28.8, 28.95) * (1 - P(t, 28.95, 29.15));
+      const b = $("#btn7");
+      b.style.transform = `scale(${(1 - pr * 0.07).toFixed(4)})`;
+      const done = t >= 29.0;
+      b.classList.toggle("done", done);
+      b.innerHTML = done ? `${ICONS.check.replace("<svg", '<svg width="16" height="16"')} Audit booked` : "Get free AI audit";
+      const lk = P(t, 29.0, 29.6, E.oExpo);
+      tf($("#lock7"), { y: (1 - lk) * 18 }); op($("#lock7"), lk);
+      op($("#url7"), P(t, 29.2, 29.7));
+    }
+
+    if (!RENDER) $("#hud").textContent = `t = ${t.toFixed(2)}s  ·  space: pause  ·  ←/→: ±0.5s`;
+  }
+  window.seek = seek;
+  window.DURATION = DUR;
+
+  /* ---------- preview player ---------- */
+  const bgs = ["shots/home-screen.jpg", "shots/product-screen.jpg", "shots/blog-screen.jpg"].map((src) => { const im = new Image(); im.src = src; return im.decode().catch(() => {}); });
+  const ready = Promise.all([document.fonts.ready, ...bgs]);
+  window.stageReady = ready.then(() => true);
+  if (!RENDER) {
+    const fit = () => document.documentElement.style.setProperty("--fit", Math.min(innerWidth / 540, (innerHeight - 30) / 960).toFixed(4));
+    fit(); addEventListener("resize", fit);
+    let t0 = performance.now(), paused = params.has("t"), cur = +(params.get("t") || 0);
+    addEventListener("keydown", (e) => {
+      if (e.code === "Space") { paused = !paused; t0 = performance.now() - cur * 1000; }
+      if (e.code === "ArrowRight") { cur = Math.min(DUR - 0.01, cur + 0.5); t0 = performance.now() - cur * 1000; seek(cur); }
+      if (e.code === "ArrowLeft") { cur = Math.max(0, cur - 0.5); t0 = performance.now() - cur * 1000; seek(cur); }
+    });
+    ready.then(() => {
+      const loop = (now) => { if (!paused) cur = ((now - t0) / 1000) % DUR; seek(cur); requestAnimationFrame(loop); };
+      requestAnimationFrame(loop);
+    });
+  }
+})();
+</script>
+</body>
+</html>
