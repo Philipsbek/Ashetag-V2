@@ -132,7 +132,7 @@
         <li class="nav__item"><a class="nav__link" href="contact.html"${cur("contact")}>Contact</a></li>
       </ul>
       <div class="nav__actions">
-        <a href="contact.html" class="btn btn--sm btn--pearl hide-md">Talk to us</a>
+        <a href="contact.html" data-wa-link class="btn btn--sm btn--pearl hide-md"><span data-icon="whatsapp" style="width:16px"></span>WhatsApp us</a>
         <a href="contact.html#audit" class="btn btn--sm btn--ink">Get free AI audit</a>
         <button class="nav__burger" aria-label="Open menu" aria-expanded="false"><span></span></button>
       </div>
@@ -144,7 +144,7 @@
     <a class="m-link" href="about.html">About us ${ICONS.chev.replace("<svg", '<svg width="18"')}</a>
     <a class="m-link" href="blog.html">Blog ${ICONS.chev.replace("<svg", '<svg width="18"')}</a>
     <a class="m-link" href="contact.html">Contact ${ICONS.chev.replace("<svg", '<svg width="18"')}</a>
-    <div class="m-actions"><a href="contact.html" class="btn btn--pearl">Talk to us</a><a href="contact.html#audit" class="btn btn--ink">Get free AI audit</a></div>
+    <div class="m-actions"><a href="contact.html" data-wa-link class="btn btn--pearl"><span data-icon="whatsapp" style="width:18px"></span>WhatsApp us</a><a href="contact.html#audit" class="btn btn--ink">Get free AI audit</a></div>
   </div>`;
 
   const footer = `
@@ -154,10 +154,10 @@
       <div class="container" style="position:relative">
         <h2 class="display reveal">Put <span class="grad-text--warm">AI agents</span> to work for your business</h2>
         <form class="capture capture--dark reveal" data-delay="1" data-capture>
-          <input type="email" required placeholder="What's your work email?" aria-label="Work email">
-          <button class="btn btn--white" type="submit">Book a call</button>
+          <input type="text" placeholder="What would you like to automate?" aria-label="What would you like to automate?" maxlength="300">
+          <button class="btn btn--white" type="submit"><span data-icon="whatsapp" style="width:18px"></span>WhatsApp us</button>
         </form>
-        <p class="capture-note reveal" data-delay="2">Free 30-minute AI audit · No commitment</p>
+        <p class="capture-note reveal" data-delay="2">Free 30-minute AI audit · We reply on WhatsApp within the hour</p>
       </div>
     </section>
     <div class="container">
@@ -195,10 +195,19 @@
   /* ---------- WhatsApp: floating button + pre-filled message ---------- */
   const WA_NUMBER = "60179812010";
   const pageNames = { home: "Home", product: "Product", about: "About us", blog: "Blog", contact: "Contact" };
-  const waText = "Hi Ashetag! 👋 I'd like to book a free AI audit for my business. Could you tell me more?" +
-    (pageNames[page] ? `\n\n(Sent from the ${pageNames[page]} page)` : "");
-  const WA_URL = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waText)}`;
-  document.querySelectorAll("[data-wa-link]").forEach((a) => { a.href = WA_URL; a.target = "_blank"; a.rel = "noopener"; });
+  const pageNote = pageNames[page] ? `\n\n(Sent from the ${pageNames[page]} page)` : "";
+  const waLink = (text) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text + pageNote)}`;
+  const openWA = (text) => {
+    const url = waLink(text);
+    const w = window.open(url, "_blank", "noopener");
+    if (!w) window.location.href = url;
+    return url;
+  };
+  const waText = "Hi Ashetag! 👋 I'd like to book a free AI audit for my business. Could you tell me more?";
+  const WA_URL = waLink(waText);
+  document.querySelectorAll("[data-wa-link]").forEach((a) => {
+    a.href = waLink(a.dataset.waText || waText); a.target = "_blank"; a.rel = "noopener";
+  });
 
   if (isSitePage) {
     const wa = document.createElement("div");
@@ -463,22 +472,42 @@
     window.open(url, "_blank", "noopener,width=600,height=560");
   }));
 
-  /* ---------- Email capture forms → contact page ---------- */
+  /* ---------- Quick capture boxes → WhatsApp with what they typed ---------- */
   document.querySelectorAll("[data-capture]").forEach((f) => {
     f.addEventListener("submit", (e) => {
       e.preventDefault();
-      const input = f.querySelector("input[type=email]");
-      if (!input.checkValidity()) { input.reportValidity(); return; }
-      try { sessionStorage.setItem("ashetag_email", input.value); } catch (_) {}
-      if (f.hasAttribute("data-newsletter")) { input.value = ""; window.toast("You're subscribed — welcome aboard!"); return; }
-      window.location.href = "contact.html#audit";
+      const input = f.querySelector("input");
+      const val = (input && input.value.trim()) || "";
+      openWA("Hi Ashetag! 👋 I'd like a free AI audit for my business." + (val ? `\n\nWhat I'd like to automate: ${val}` : ""));
+      if (input) input.value = "";
+      window.toast("Opening WhatsApp…");
     });
   });
 
-  /* ---------- Contact form ---------- */
+  /* ---------- Contact form → pre-written WhatsApp message ---------- */
   const cform = document.querySelector("[data-contact-form]");
   if (cform) {
-    try { const saved = sessionStorage.getItem("ashetag_email"); if (saved && cform.email && !cform.email.value) cform.email.value = saved; } catch (_) {}
+    const submitBtn = cform.querySelector("button[type=submit]");
+    const submitHTML = submitBtn.innerHTML;
+    let lastText = "";
+    const buildMessage = () => {
+      const v = (n) => (cform.elements[n] && cform.elements[n].value.trim()) || "";
+      const interests = [...cform.querySelectorAll("input[name=interest]:checked")].map((c) => c.nextElementSibling.textContent.trim());
+      const budget = cform.querySelector("input[name=budget]:checked");
+      const lines = [
+        "Hi Ashetag! 👋 I'd like to book a free AI audit.",
+        "",
+        `Name: ${v("name")}`,
+        v("company") && `Company: ${v("company")}`,
+        `Team size: ${v("size")}`,
+        interests.length && `Interested in: ${interests.join(", ")}`,
+        budget && `Budget: ${budget.nextElementSibling.textContent.trim()}`,
+        "",
+        "What's eating up our time:",
+        v("message"),
+      ];
+      return lines.filter((l) => l !== false && l !== 0 && l !== null && l !== undefined).join("\n").replace(/\n{3,}/g, "\n\n");
+    };
     const validate = (field) => {
       const wrap = field.closest(".field"); if (!wrap) return true;
       const ok = field.checkValidity(); wrap.classList.toggle("has-error", !ok); return ok;
@@ -489,17 +518,18 @@
       let ok = true; let first;
       cform.querySelectorAll("input[required], textarea[required], select[required]").forEach((f) => { if (!validate(f)) { ok = false; first = first || f; } });
       if (!ok) { first.focus(); return; }
-      const btn = cform.querySelector("button[type=submit]"); btn.disabled = true; btn.textContent = "Sending…";
-      setTimeout(() => {
-        document.querySelector(".form-success").classList.add("is-on");
-        document.querySelector(".form-success .doodle")?.classList.add("draw");
-        requestAnimationFrame(() => document.querySelector(".form-success .doodle")?.classList.add("is-in"));
-        try { sessionStorage.removeItem("ashetag_email"); } catch (_) {}
-      }, 900);
+      // Open WhatsApp synchronously inside the submit handler so pop-up blockers allow it.
+      lastText = buildMessage();
+      openWA(lastText);
+      document.querySelector(".form-success").classList.add("is-on");
+      document.querySelector(".form-success .doodle")?.classList.add("draw");
+      requestAnimationFrame(() => document.querySelector(".form-success .doodle")?.classList.add("is-in"));
     });
+    const reopen = document.querySelector("[data-wa-reopen]");
+    if (reopen) reopen.addEventListener("click", () => openWA(lastText || buildMessage()));
     const reset = document.querySelector("[data-reset-form]");
     if (reset) reset.addEventListener("click", () => {
-      cform.reset(); const btn = cform.querySelector("button[type=submit]"); btn.disabled = false; btn.textContent = "Send message";
+      submitBtn.innerHTML = submitHTML;
       document.querySelector(".form-success").classList.remove("is-on");
     });
   }
